@@ -1,0 +1,10 @@
+# Dependencias y builds
+node_modules/
+dist/
+
+# Python
+__pycache__/
+*.pyc
+
+# Ajustes locales de Claude Code
+.claude/settings.local.json
