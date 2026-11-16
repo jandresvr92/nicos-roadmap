@@ -206,6 +206,20 @@ body {
   font: 800 15px inherit; font-family: inherit; color: #fff;
   background: linear-gradient(135deg, #f3a35f, #ff6a3d); box-shadow: 0 8px 20px rgba(255,106,61,.4);
 }
+/* ---------- Candado por fecha ---------- */
+.gate { display: flex; flex-direction: column; align-items: center; gap: 12px; animation: rise .5s ease .2s both; }
+.gate label { font-size: 16px; line-height: 1.5; color: #45434f; max-width: 340px; }
+.gate input {
+  font: 700 18px inherit; font-family: inherit; color: #2b2a33; text-align: center;
+  padding: 10px 16px; border-radius: 14px; border: 2px solid #f3c79a; background: #fff;
+  outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.gate input:focus { border-color: #ff6a3d; box-shadow: 0 0 0 4px rgba(255,106,61,.18); }
+.gate input.shake { border-color: #e0344f; animation: shake .4s ease; }
+.gate-error { min-height: 1.4em; font-size: 14px; font-weight: 700; color: #e0344f; }
+.gate .modal-cta { margin-top: 0; }
+@keyframes shake { 20%, 60% { transform: translateX(-6px) } 40%, 80% { transform: translateX(6px) } }
+
 @keyframes fade { from { opacity: 0 } }
 @keyframes rise { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
 @keyframes bounce { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }

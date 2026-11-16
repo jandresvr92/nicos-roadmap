@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { LOGOS } from '../data/achievements'
-import { BIRTHDAY_MESSAGE, BIRTHDAY_TITLE } from '../config'
+import { BIRTHDAY_MESSAGE, BIRTHDAY_TITLE, UNLOCK_DATE, UNLOCK_HINT } from '../config'
 import songUrl from '../assets/best-friend.mp3'
 import friendsImageUrl from '../assets/friends-image.jpg'
 
@@ -125,8 +125,57 @@ function Confetti() {
   )
 }
 
+/* ---------------- Candado por fecha ---------------- */
+function DateGate({ onUnlock, onClose }) {
+  const [value, setValue] = useState('')
+  const [error, setError] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+
+  const submit = (e) => {
+    e.preventDefault()
+    if (value === UNLOCK_DATE) {
+      onUnlock()
+    } else {
+      setError(true)
+      setAttempt((n) => n + 1) // vuelve a lanzar la animación de "sacudida"
+    }
+  }
+
+  return (
+    <div className="modal-message">
+      <button className="popup-close" onClick={onClose} aria-label="Cerrar">
+        ✕
+      </button>
+      <div className="modal-badge">🔒</div>
+      <h2>Mensaje secreto</h2>
+      <form className="gate" onSubmit={submit}>
+        <label htmlFor="gate-date">{UNLOCK_HINT}</label>
+        <input
+          key={attempt}
+          id="gate-date"
+          type="date"
+          className={error ? 'shake' : ''}
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value)
+            setError(false)
+          }}
+          required
+          autoFocus
+        />
+        <p className="gate-error" aria-live="polite">
+          {error ? 'Mmm… esa no es la fecha. ¡Inténtalo de nuevo!' : ' '}
+        </p>
+        <button type="submit" className="modal-cta">
+          🔓 Desbloquear
+        </button>
+      </form>
+    </div>
+  )
+}
+
 /* ---------------- Modal de cumpleaños ---------------- */
-export function BirthdayModal({ open, onClose }) {
+export function BirthdayModal({ open, onClose, unlocked, onUnlock }) {
   useEffect(() => {
     if (!open) return
     const onKey = (e) => e.key === 'Escape' && onClose()
@@ -137,11 +186,14 @@ export function BirthdayModal({ open, onClose }) {
   if (!open) return null
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <Confetti />
+      {unlocked && <Confetti />}
       <div className="modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         {/* Panel izquierdo: el diorama 3D se coloca encima de este marco */}
         <div className="modal-scene" aria-hidden />
-        {/* Panel derecho: el mensaje */}
+        {/* Panel derecho: primero se pide la fecha, después el mensaje */}
+        {!unlocked ? (
+          <DateGate onUnlock={onUnlock} onClose={onClose} />
+        ) : (
         <div className="modal-message">
           <button className="popup-close" onClick={onClose} aria-label="Cerrar">
             ✕
@@ -162,6 +214,7 @@ export function BirthdayModal({ open, onClose }) {
             🎉 ¡Gracias!
           </button>
         </div>
+        )}
       </div>
     </div>
   )
@@ -190,13 +243,20 @@ export function Header() {
 
 /* ---------------- Capa de UI completa ---------------- */
 export default function UI({ selected, onCloseSelected, birthdayOpen, setBirthdayOpen }) {
+  // Una vez desbloqueado, no se vuelve a pedir la fecha mientras la página siga abierta.
+  const [unlocked, setUnlocked] = useState(false)
   return (
     <>
       <Header />
       <MusicButton />
       <AchievementPopup item={selected} onClose={onCloseSelected} />
       <BirthdayButton onClick={() => setBirthdayOpen(true)} />
-      <BirthdayModal open={birthdayOpen} onClose={() => setBirthdayOpen(false)} />
+      <BirthdayModal
+        open={birthdayOpen}
+        onClose={() => setBirthdayOpen(false)}
+        unlocked={unlocked}
+        onUnlock={() => setUnlocked(true)}
+      />
     </>
   )
 }
